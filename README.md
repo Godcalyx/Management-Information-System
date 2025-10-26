@@ -1,100 +1,31 @@
 # 🏫 LSHS: Online Management Information System
 
-A **web-based information system** developed for **Laboratory Science High School (LSHS)** to streamline academic and administrative processes such as student enrollment, attendance tracking, grading, and report generation.
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Active-success)](https://github.com/Godcalyx/Management-Information-System)
 
----
-
-## 📋 Table of Contents
-
--   [About the Project](#-about-the-project)
--   [Features](#-features)
--   [Tech Stack](#-tech-stack)
--   [Installation](#-installation)
--   [Usage](#-usage)
--   [Folder Structure](#-folder-structure)
--   [Screenshots](#-screenshots)
--   [Future Improvements](#-future-improvements)
--   [License](#-license)
--   [Author](#-author)
-
----
-
-## 🧩 About the Project
-
-The **LSHS Online Management Information System (OMIS)** is designed to automate and simplify the school’s record management tasks, reducing manual work and improving data accuracy and accessibility for both faculty and students.
-
-This project was developed as a **capstone system** under the **Computer Studies Department**.
+A comprehensive **school management platform** designed for **Laguna Senior High School (LSHS)** to simplify and automate academic and administrative workflows.  
+It enables administrators, teachers, and students to manage school operations efficiently within a centralized online system.
 
 ---
 
 ## ✨ Features
 
-✅ **User Roles & Authentication**
-
--   Separate dashboards for Admin, Teachers, and Students
--   Secure login and access management
-
-✅ **Student Information Management**
-
--   Create, update, and view student records
--   Upload and manage student documents
-
-✅ **Enrollment System**
-
--   Automated student registration and section assignment
--   Yearly enrollment records tracking
-
-✅ **Grading & Evaluation**
-
--   Faculty-grade encoding and computation
--   Automated report card and ranking generation
-
-✅ **Attendance Monitoring**
-
--   Class attendance recording and report generation
-
-✅ **Reports & Data Export**
-
--   Generate printable reports and Excel exports
--   Custom date, section, and grade-level filters
-
----
-
-## 🛠️ Tech Stack
-
-| Category            | Technology                       |
-| ------------------- | -------------------------------- |
-| **Frontend**        | HTML, CSS, JavaScript, Bootstrap |
-| **Backend**         | PHP (Laravel / Core PHP)         |
-| **Database**        | MySQL (via XAMPP)                |
-| **Server**          | Apache (XAMPP)                   |
-| **Version Control** | Git & GitHub                     |
-
----
-
-## ⚙️ Installation
-
-### Prerequisites
-
-Make sure you have the following installed:
-
--   [XAMPP](https://www.apachefriends.org/download.html)
--   [Git](https://git-scm.com/downloads)
--   Web browser (Chrome, Edge, Firefox)
-
-### Steps
-
-1. **Clone this repository**
-<<<<<<< HEAD
-   ```bash
-   git clone https://github.com/Godcalyx/Management-Information-System.git
+- 👩‍🏫 **Admin Dashboard** – Real-time school data overview  
+- 🎓 **Student Management** – Add, edit, or delete student records  
+- 🧾 **Report Card Generation** – Automatically generate printable student cards  
+- 🕒 **Attendance Tracking** – Monitor daily attendance  
+- 📨 **Announcements** – Post and manage updates for users  
+- 🔐 **Secure Login System** – Role-based access for Admin, Teacher, and Student  
 
 ---
 
 ## 🖼️ Screenshots
 
-### 🔐 Login Page
-![Login Page](screenshots/Admin_Login.png)
+### 🔐 Admin Login
+![Admin Login](screenshots/Admin_Login.png)
 
 ### 🏠 Admin Dashboard
 ![Admin Dashboard](screenshots/Admin_Dashboard.png)
@@ -103,9 +34,24 @@ Make sure you have the following installed:
 ![Student List](screenshots/Student_List.png)
 
 ### 🧾 Report Card
-![Grades Report](screenshots/Report_Card.png)
-=======
-    ```bash
-    git clone https://github.com/Godcalyx/Management-Information-System.git
-    ```
->>>>>>> 43e6efa (Add screenshots and update README)
+![Report Card](screenshots/Report_Card.png)
+
+---
+
+## 🧰 Tech Stack
+
+| Layer | Technology Used |
+|-------|------------------|
+| **Frontend** | HTML, CSS, JavaScript, Bootstrap |
+| **Backend** | PHP (Laravel Framework) |
+| **Database** | MySQL |
+| **Server** | XAMPP / Apache |
+| **Version Control** | Git & GitHub |
+
+---
+
+## ⚙️ Installation Guide
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/Godcalyx/Management-Information-System.git
