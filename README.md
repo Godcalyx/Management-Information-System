@@ -75,3 +75,19 @@ Make sure you have the following installed:
 1. **Clone this repository**
    ```bash
    git clone https://github.com/Godcalyx/Management-Information-System.git
+
+---
+
+## 🖼️ Screenshots
+
+### 🔐 Login Page
+![Login Page](screenshots/Admin_Login.png)
+
+### 🏠 Admin Dashboard
+![Admin Dashboard](screenshots/Admin_Dashboard.png)
+
+### 👩‍🎓 Student Management
+![Student List](screenshots/Student_List.png)
+
+### 🧾 Report Card
+![Grades Report](screenshots/Report_Card.png)
