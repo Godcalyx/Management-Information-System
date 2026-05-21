@@ -12,7 +12,7 @@ Here are your temporary login credentials:
 
 > Please log in and **change your password immediately**.
 
-@component('mail::button', ['url' => url('/professor/login')])
+@component('mail::button', ['url' => url('/login/professor')])
 Login Now
 @endcomponent
 

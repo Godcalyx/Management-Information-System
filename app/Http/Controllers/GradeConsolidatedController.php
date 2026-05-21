@@ -4,76 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use App\Models\Grade;
-use App\Models\User;
 use App\Models\Enrollment;
+use App\Models\GradeLevel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class GradeConsolidatedController extends Controller
 {
     public function index(Request $request)
-{
-    $gradeLevels = Subject::distinct()->pluck('grade_level');
-    $selectedGrade = $request->input('grade_level');
-    $quarter = $request->input('quarter');
+    {
+        $gradeLevels = GradeLevel::orderBy('order')->get();
+        $selectedGradeId = $request->input('grade_level_id');
+        $quarter = $request->input('quarter');
 
-    $subjects = collect();
-    $students = collect();
+        $subjects = collect();
+        $students = collect();
 
-    if ($selectedGrade && $quarter) {
-        $subjects = Subject::where('grade_level', $selectedGrade)->get();
+        if ($selectedGradeId && $quarter) {
+            $subjects = Subject::where('grade_level_id', $selectedGradeId)->get();
 
-        // Fetch students from enrollments
-        $students = Enrollment::with('user') // Load related User (student)
-            ->where('status', 'approved') // ✅ Only approved students
-            ->where('grade_level', $selectedGrade)
-            ->orderBy('last_name')
-            ->get();
+            // Get latest enrollment per student
+            $latestEnrollmentIds = Enrollment::selectRaw('MAX(id) as id')
+                ->groupBy('user_id')
+                ->pluck('id');
 
-        foreach ($students as $student) {
-            $userId = $student->user_id;
+            // Get students whose latest enrollment matches the selected grade
+            $students = Enrollment::with('user', 'gradeLevel')
+                ->whereIn('id', $latestEnrollmentIds)
+                ->where('grade_level_id', $selectedGradeId)
+                ->where('status', 'approved')
+                ->get()
+                ->sortBy(fn($s) => $s->user->last_name);
 
-            $grades = Grade::where('user_id', $userId)
-                ->where('quarter', $quarter)
-                ->where('school_year', now()->year)
-                ->get();
+            foreach ($students as $student) {
+                // Use the enrollment's school_year
+                $grades = Grade::where('user_id', $student->user_id)
+                    ->where('quarter', $quarter)
+                    ->where('school_year', $student->school_year) // enrollment's school year
+                    ->get();
 
-            $student->grades = $grades;
-            $total = 0;
-            $count = 0;
+                $student->grades = $grades;
 
-            foreach ($subjects as $subject) {
-                $grade = $grades->firstWhere('subject_id', $subject->id);
-                if ($grade && $grade->grade !== null) {
-                    $total += $grade->grade;
-                    $count++;
+                // Calculate average
+                $total = 0;
+                $count = 0;
+                foreach ($subjects as $subject) {
+                    $grade = $grades->firstWhere('subject_id', $subject->id);
+                    if ($grade && $grade->grade !== null) {
+                        $total += $grade->grade;
+                        $count++;
+                    }
                 }
-            }
 
-            $average = $count > 0 ? round($total / $count, 2) : null;
-            $student->average = $average;
+                $student->average = $count > 0 ? round($total / $count, 2) : null;
 
-            if ($average !== null) {
-                if ($average >= 98) {
-                    $student->remarks = '🥇 With Highest Honors';
-                } elseif ($average >= 95) {
-                    $student->remarks = '🥈 With High Honors';
-                } elseif ($average >= 90) {
-                    $student->remarks = '🏅 With Honors';
-                } elseif ($average >= 75) {
-                    $student->remarks = 'PASSED';
+                // Assign remarks
+                $avg = $student->average;
+                if ($avg !== null) {
+                    $student->remarks =
+                        $avg >= 98 ? '🥇 With Highest Honors' :
+                        ($avg >= 95 ? '🥈 With High Honors' :
+                        ($avg >= 90 ? '🏅 With Honors' :
+                        ($avg >= 75 ? 'PASSED' : 'FAILED')));
                 } else {
-                    $student->remarks = 'FAILED';
+                    $student->remarks = 'No Grades';
                 }
-            } else {
-                $student->remarks = 'No Grades';
             }
         }
+
+        return view('professor.grades.consolidated', compact(
+            'gradeLevels', 'subjects', 'students', 'selectedGradeId', 'quarter'
+        ));
     }
-
-    return view('professor.grades.consolidated', compact('gradeLevels', 'subjects', 'students', 'selectedGrade', 'quarter'));
-}
-
-
 }

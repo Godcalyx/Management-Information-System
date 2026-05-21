@@ -12,10 +12,10 @@ class Grade extends Model
     protected $fillable = [
         'user_id',
         'subject_id',
-        'section_id',
         'quarter',
         'school_year',
         'grade',
+        'grade_level',
         'submitted_by',
         'approved_by',
         'status',
@@ -27,13 +27,6 @@ class Grade extends Model
 {
     return $this->belongsTo(User::class, 'user_id')->where('role', 'student');
 }
-
-
-    public function subject() {
-    return $this->belongsTo(Subject::class);
-}
-
-
 
     public function section()
     {
@@ -50,10 +43,19 @@ class Grade extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function user()
+    // app/Models/Grade.php
+
+public function user()
 {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(User::class, 'user_id'); // important: use 'user_id' foreign key
 }
+
+ public function subject()
+    {
+        // grades.subject_id -> subjects.id
+        return $this->belongsTo(\App\Models\Subject::class, 'subject_id', 'id');
+    }
+
 
 
 

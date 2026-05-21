@@ -24,8 +24,9 @@
             <i class="bi bi-megaphone-fill me-1"></i> Post a New Announcement
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('admin.announcements.index') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('professor.announcements.store') }}" enctype="multipart/form-data">
                 @csrf
+
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Title</label>
                     <input 
@@ -47,6 +48,17 @@
                         placeholder="Write your announcement details..." 
                         required
                     ></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Target Grades</label>
+                    <select name="target_grades[]" class="form-select shadow-sm" multiple>
+    @foreach($professorGrades as $id => $name)
+        <option value="{{ $name }}">{{ $name }}</option>
+    @endforeach
+</select>
+<small class="text-muted">Leave empty to post for all your assigned grades</small>
+
                 </div>
 
                 <div class="mb-3">
@@ -80,6 +92,7 @@
                         <th>#</th>
                         <th>Title</th>
                         <th>Content</th>
+                        <th>Target Grades</th>
                         <th>Posted At</th>
                         <th>Attachment</th>
                         <th>Actions</th>
@@ -91,6 +104,15 @@
                             <td>{{ $loop->iteration }}</td>
                             <td class="fw-semibold">{{ $announcement->title }}</td>
                             <td>{{ Str::limit($announcement->content, 70) }}</td>
+                            <td>
+                                @if($announcement->target_grades)
+                                    @foreach(json_decode($announcement->target_grades) as $grade)
+                                        <span class="badge bg-primary">{{ $grade }}</span>
+                                    @endforeach
+                                @else
+                                    <span class="badge bg-secondary">All</span>
+                                @endif
+                            </td>
                             <td>{{ $announcement->created_at->format('M d, Y • h:i A') }}</td>
                             <td>
                                 @if($announcement->attachment)
@@ -104,7 +126,7 @@
                                 @endif
                             </td>
                             <td>
-                                <form action="{{ route('admin.announcements.destroy', $announcement->id) }}" 
+                                <form action="{{ route('professor.announcements.destroy', $announcement->id) }}" 
                                       method="POST" 
                                       onsubmit="return confirm('Are you sure you want to delete this announcement?')"
                                       class="d-inline">

@@ -6,7 +6,7 @@
 @section('content')
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="text-success fw-bold">Current School Year: 2024–2025</h5>
+        <h5 class="text-success fw-bold">Current School Year: {{ $schoolYear }}</h5>
     </div>
 
     <div class="table-responsive shadow-sm rounded-3">
@@ -19,8 +19,6 @@
                     <th>Q3</th>
                     <th>Q4</th>
                     <th>Final Grade</th>
-                    <th>Trend</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -39,25 +37,15 @@
                         $final = $validGrades->isNotEmpty() ? $validGrades->avg() : null;
 
                         if ($final !== null) $finalGrades[] = $final;
-
-                        $trend = '—';
-                        if (is_numeric($q3) && is_numeric($q4)) {
-                            $trend = $q4 > $q3 ? '📈 Improved' : ($q4 < $q3 ? '⚠️ Dropped' : '➖ Same');
-                        }
-
-                        $status = $final !== null ? ($final >= 75 ? '✅ Passed' : '❌ Failed') : '—';
-                        $statusClass = $final !== null ? ($final >= 75 ? 'text-success fw-bold' : 'text-danger fw-bold') : 'text-muted';
                     @endphp
 
                     <tr>
                         <td class="text-start">{{ $subject }}</td>
-                        <td>{{ is_numeric($q1) ? $q1 : '—' }}</td>
-                        <td>{{ is_numeric($q2) ? $q2 : '—' }}</td>
-                        <td>{{ is_numeric($q3) ? $q3 : '—' }}</td>
-                        <td>{{ is_numeric($q4) ? $q4 : '—' }}</td>
-                        <td class="fw-bold">{{ $final !== null ? number_format($final, 2) : '—' }}</td>
-                        <td>{{ $trend }}</td>
-                        <td class="{{ $statusClass }}">{{ $status }}</td>
+                        <td class="{{ is_numeric($q1) && $q1 < 75 ? 'text-danger fw-bold' : '' }}">{{ is_numeric($q1) ? $q1 : '—' }}</td>
+                        <td class="{{ is_numeric($q2) && $q2 < 75 ? 'text-danger fw-bold' : '' }}">{{ is_numeric($q2) ? $q2 : '—' }}</td>
+                        <td class="{{ is_numeric($q3) && $q3 < 75 ? 'text-danger fw-bold' : '' }}">{{ is_numeric($q3) ? $q3 : '—' }}</td>
+                        <td class="{{ is_numeric($q4) && $q4 < 75 ? 'text-danger fw-bold' : '' }}">{{ is_numeric($q4) ? $q4 : '—' }}</td>
+                        <td class="fw-bold {{ is_numeric($final) && $final < 75 ? 'text-danger' : '' }}">{{ $final !== null ? number_format($final, 2) : '—' }}</td>
                     </tr>
                 @endforeach
 
@@ -68,7 +56,7 @@
                     @endphp
                     <tr class="table-secondary fw-bold">
                         <td colspan="5" class="text-end">General Weighted Average (GWA)</td>
-                        <td>{{ number_format($gwa, 2) }}</td>
+                        <td class="{{ is_numeric($gwa) && $gwa < 75 ? 'text-danger fw-bold' : 'fw-bold' }}">{{ number_format($gwa, 2) }}</td>
                         <td colspan="2"></td>
                     </tr>
                 @endif

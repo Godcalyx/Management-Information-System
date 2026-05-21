@@ -16,7 +16,7 @@
     /* BODY */
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #001a1a, #002b2b);
+      background: linear-gradient(135deg, #1a0003ff, #a82222ff);
       color: #f5f5f5;
       min-height: 100vh;
       display: flex;
@@ -44,7 +44,7 @@
     .register-container {
       position: relative;
       z-index: 1;
-      background: rgba(0, 25, 25, 0.95);
+      background: rgba(57, 2, 2, 0.95);
       border-radius: 12px;
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
       width: 100%;

@@ -45,17 +45,17 @@
                                     <td>{{ $enrollment->lrn }}</td>
                                     <td>
     @php
-        $level = (int) $enrollment->grade_level; // force to integer
+    $grade = $enrollment->gradeLevel->name ?? 'N/A';
 
-        $gradeColor = match($level) {
-            7 => 'bg-success',              // Green
-            8 => 'bg-warning text-dark',    // Yellow
-            9 => 'bg-danger',               // Red
-            10 => 'bg-primary',             // Blue
-            default => 'bg-secondary'       // Fallback (gray)
-        };
-    @endphp
-    <span class="badge {{ $gradeColor }}">Grade {{ $enrollment->grade_level }}</span>
+    $gradeColor = match((int) $grade) {
+        7 => 'bg-success',
+        8 => 'bg-warning text-dark',
+        9 => 'bg-danger',
+        10 => 'bg-primary',
+        default => 'bg-secondary'
+    };
+@endphp
+<span class="badge {{ $gradeColor }}">Grade {{ $grade }}</span>
 </td>
 
                                     <td>{{ $enrollment->updated_at->format('F d, Y') }}</td>
@@ -95,18 +95,19 @@
                                     <td>{{ $enrollment->first_name }} {{ $enrollment->middle_name }} {{ $enrollment->last_name }}</td>
                                     <td>{{ $enrollment->lrn }}</td>
                                     <td>
-    @php
-        $level = (int) $enrollment->grade_level; // force to integer
+   @php
+    $grade = $enrollment->gradeLevel->name ?? 'N/A';
 
-        $gradeColor = match($level) {
-            7 => 'bg-success',              // Green
-            8 => 'bg-warning text-dark',    // Yellow
-            9 => 'bg-danger',               // Red
-            10 => 'bg-primary',             // Blue
-            default => 'bg-secondary'       // Fallback (gray)
-        };
-    @endphp
-    <span class="badge {{ $gradeColor }}">Grade {{ $enrollment->grade_level }}</span>
+    $gradeColor = match((int) $grade) {
+        7 => 'bg-success',
+        8 => 'bg-warning text-dark',
+        9 => 'bg-danger',
+        10 => 'bg-primary',
+        default => 'bg-secondary'
+    };
+@endphp
+<span class="badge {{ $gradeColor }}">Grade {{ $grade }}</span>
+
 </td>
 
                                     <td>{{ $enrollment->updated_at->format('F d, Y') }}</td>

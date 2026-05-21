@@ -4,21 +4,21 @@
 <style>
   /* Reset / base */
   @font-face {
-  font-family: 'Aptos';
-  src: url('/fonts/Aptos.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'Aptos-Bold';
-  src: url('/fonts/Aptos-Bold.ttf') format('truetype');
-}
+    font-family: 'Aptos';
+    src: url('/fonts/Aptos.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'Aptos-Bold';
+    src: url('/fonts/Aptos-Bold.ttf') format('truetype');
+  }
 
-* { box-sizing: border-box; }
-body {
-  margin:0;
-  font-family: 'Aptos', sans-serif;
-  background: radial-gradient(circle at top left, #0e2f0c 0%, #001a00 100%);
-  color:#f2f2f2;
-}
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Aptos', sans-serif;
+    background: radial-gradient(circle at top left, #0e2f0c 0%, #001a00 100%);
+    color: #f2f2f2;
+  }
 
   .container-enroll {
     min-height: 75vh;
@@ -28,7 +28,7 @@ body {
     position: relative;
   }
 
-  /* Subtle particles (low-cost) */
+  /* Subtle particles */
   .particles { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
   .particle { position:absolute; width:3px; height:3px; background:rgba(255,255,255,0.6); border-radius:50%; opacity:0.35; transform: translateY(0); animation: float 6s infinite ease-in-out; }
   @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-18px); } }
@@ -48,24 +48,14 @@ body {
   }
 
   /* Header */
-  .enroll-header {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    margin-bottom: 18px;
-  }
+  .enroll-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 18px; }
   .enroll-title { display:flex; gap:12px; align-items:center; }
   .enroll-title h1 { font-size:20px; margin:0; color:#FFD700; letter-spacing:0.2px; }
   .enroll-title p { margin:0; color:#cfcfcf; font-size:13px; }
 
   /* Progress steps */
   .progress-steps { display:flex; align-items:center; gap:12px; margin: 18px 0 24px; }
-  .step {
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
+  .step { display:flex; align-items:center; gap:12px; }
   .step-dot {
     width:36px; height:36px; border-radius:50%;
     display:grid; place-items:center;
@@ -95,14 +85,41 @@ body {
   .col { flex:1 1 220px; min-width:150px; }
 
   label { display:block; font-size:13px; color:#cfcfcf; margin-bottom:6px; }
-  input.form-control, select.form-control, textarea.form-control {
-    width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.03); color:#f5f5f5; font-size:14px;
+
+  /* Inputs / selects / textareas */
+  input.form-control,
+  select.form-control,
+  textarea.form-control {
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.06);
+    color:#ffffff;
+    font-size:14px;
+    font-weight:500;
     transition: box-shadow .16s ease, border-color .12s ease;
   }
-  input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
-    outline:none; border-color: rgba(255,215,0,0.9); box-shadow:0 0 0 6px rgba(255,215,0,0.06);
-    background: rgba(255,255,255,0.04);
+
+  input.form-control::placeholder,
+  textarea.form-control::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+
+  input.form-control:focus,
+  select.form-control:focus,
+  textarea.form-control:focus {
+    outline:none;
+    border-color: rgba(255,215,0,0.9);
+    box-shadow:0 0 0 6px rgba(255,215,0,0.06);
+    background: rgba(255,255,255,0.08);
+    color:#ffffff;
+  }
+
+  /* File inputs */
+  input[type="file"].form-control {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
   }
 
   .note { font-size:13px; color:#bfbfbf; margin-top:6px; }
@@ -114,38 +131,20 @@ body {
 
   .small { font-size:13px; color:#ddd; }
 
-  /* file input style */
-  .custom-file { display:flex; gap:8px; align-items:center; }
-  .custom-file input[type=file] { flex:1; }
-
   /* validation */
   .is-invalid { border-color:#ff4c4c !important; box-shadow: 0 0 0 6px rgba(255,76,76,0.06) !important; }
   .invalid-feedback { color:#ff8b8b; font-size:13px; margin-top:6px; }
 
   /* responsive */
-  @media (max-width: 900px) {
-    .row { gap:10px; }
-    .enroll-card { padding:18px; }
-  }
-  @media (max-width: 560px) {
-    .enroll-card { padding:14px; border-radius:10px; }
-    .step-label { display:none; }
-    .step-dot { width:30px; height:30px; font-size:13px; }
-  }
+  @media (max-width: 900px) { .row { gap:10px; } .enroll-card { padding:18px; } }
+  @media (max-width: 560px) { .enroll-card { padding:14px; border-radius:10px; } .step-label { display:none; } .step-dot { width:30px; height:30px; font-size:13px; } }
 </style>
 
 <div class="container-enroll">
-  {{-- <div class="particles" aria-hidden="true">
-    <div class="particle" style="top:6%; left:12%; animation-delay:0s"></div>
-    <div class="particle" style="top:25%; left:78%; animation-delay:1.2s"></div>
-    <div class="particle" style="top:64%; left:34%; animation-delay:2.4s"></div>
-    <div class="particle" style="top:84%; left:86%; animation-delay:1.8s"></div>
-  </div> --}}
-
   <div class="enroll-card" role="main" aria-labelledby="enrollHeading">
     <div class="enroll-header">
       <div class="enroll-title">
-        <img src="{{ asset('images/logo123-removebg-preview.png') }}" alt="CvSU" style="width:60px; border-radius:6px;">
+        <img src="{{ asset('images/logo.jpg') }}" alt="CvSU" style="width:60px; border-radius:6px;">
         <div>
           <h1 id="enrollHeading">LSHS Student Enrollment</h1>
           <p class="small">Please follow the steps. You can go back to review before submitting.</p>
@@ -193,30 +192,36 @@ body {
           <div class="row">
             <div class="col">
               <label for="lrn">Learner Reference Number (LRN)</label>
-              <input id="lrn" name="lrn" type="text" maxlength="12" class="form-control" pattern="\d{12}" required>
+             <input id="lrn" name="lrn" type="text" maxlength="12" class="form-control" pattern="\d{12}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
               <div class="invalid-feedback" id="lrnError" style="display:none;">LRN must be exactly 12 digits.</div>
             </div>
-
             <div class="col">
               <label for="email">Email</label>
               <input id="email" name="email" type="email" class="form-control" required>
             </div>
-
             <div class="col">
               <label for="school_year">School Year</label>
               <input id="school_year" name="school_year" type="text" class="form-control" placeholder="e.g. 2024-2025">
             </div>
-
             <div class="col">
-              <label for="grade_level">Grade Level to Enroll</label>
-              <select id="grade_level" name="grade_level" class="form-control" required>
-                <option value="">-- Select Grade --</option>
-                @for($i=7;$i<=10;$i++) <option value="{{ $i }}">{{ $i }}</option> @endfor
-              </select>
-            </div>
+  <label for="grade_level">Grade Level to Enroll</label>
+  {{-- <select id="grade_level" name="grade_level" class="form-control" 
+          style="background: rgba(38, 53, 33, 0.95); color:rgba(239, 230, 230, 0.95); border-color:#ccc;">
+    <option value="">-- Select Grade --</option>
+    @for($i=7;$i<=10;$i++)
+      <option value="{{ $i }}">{{ $i }}</option>
+    @endfor
+  </select> --}}
+  <select name="grade_level_id" class="form-select" style="background: rgba(38, 53, 33, 0.95); color:rgba(239, 230, 230, 0.95); border-color:#ccc;" required>
+    <option value="">-- Select Grade Level --</option>
+    @foreach($gradeLevels as $grade)
+        <option value="{{ $grade->id }}">{{ $grade->name }}</option>
+    @endforeach
+</select>
+</div>
+
           </div>
         </div>
-
         <div class="actions">
           <button type="button" class="btn btn-ghost" onclick="window.location.href='{{ route('login.student') }}'">Back to Login</button>
           <div>
@@ -229,21 +234,22 @@ body {
       <section class="section" data-step="2" id="step-2">
         <div class="panel">
           <h3>Learner Information</h3>
-
           <div class="row">
-            <div class="col">
-              <label for="last_name">Last Name</label>
-              <input id="last_name" name="last_name" type="text" class="form-control" required>
-            </div>
-            <div class="col">
-              <label for="first_name">First Name</label>
-              <input id="first_name" name="first_name" type="text" class="form-control" required>
-            </div>
-            <div class="col">
-              <label for="middle_name">Middle Name</label>
-              <input id="middle_name" name="middle_name" type="text" class="form-control">
-            </div>
-          </div>
+            <div class="mb-3">
+    <label class="form-label fw-semibold">Last Name</label>
+    <input type="text" name="last_name" class="form-control" required>
+</div>
+
+<div class="mb-3">
+    <label class="form-label fw-semibold">First Name</label>
+    <input type="text" name="first_name" class="form-control" required>
+</div>
+
+<div class="mb-3">
+    <label class="form-label fw-semibold">Middle Name</label>
+    <input type="text" name="middle_name" class="form-control">
+</div>
+
 
           <div class="row" style="margin-top:10px;">
             <div class="col">
@@ -263,9 +269,10 @@ body {
           <div class="row" style="margin-top:10px;">
             <div class="col">
               <label for="sex">Sex</label>
-              <select id="sex" name="sex" class="form-control" required>
+              <select id="sex" name="sex" class="form-control" style="background: rgba(38, 53, 33, 0.95); color:rgba(239, 230, 230, 0.95); border-color:#ccc;" required>
                 <option value="">-- Select --</option>
-                <option>Male</option><option>Female</option>
+                <option>Male</option>
+                <option>Female</option>
               </select>
             </div>
             <div class="col">
@@ -305,32 +312,32 @@ body {
       </section>
 
       <!-- Step 3: Address -->
-<section class="section" data-step="3" id="step-3">
-  <div class="panel">
-    <h3>Current Address</h3>
-    <div id="current-address">
-      {{-- Uses prefix="current" so it matches controller fields --}}
-      @include('partials.address-form', ['prefix' => 'current'])
-    </div>
+      <section class="section" data-step="3" id="step-3">
+        <div class="panel">
+          <h3>Current Address</h3>
+          <div id="current-address">
+            {{-- Uses prefix="current" so it matches controller fields --}}
+            @include('partials.address-form', ['prefix' => 'current'])
+          </div>
 
-    <div style="margin-top: 12px;">
-      <label class="small" style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="same_address"> Same as Current Address
-      </label>
-    </div>
+          <div style="margin-top: 12px;">
+            <label class="small" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="same_address"> Same as Current Address
+            </label>
+          </div>
 
-    <h3 style="margin-top: 14px;">Permanent Address</h3>
-    <div id="permanent-address">
-      {{-- Uses prefix="permanent" --}}
-      @include('partials.address-form', ['prefix' => 'permanent'])
-    </div>
-  </div>
+          <h3 style="margin-top: 14px;">Permanent Address</h3>
+          <div id="permanent-address">
+            {{-- Uses prefix="permanent" --}}
+            @include('partials.address-form', ['prefix' => 'permanent'])
+          </div>
+        </div>
 
-  <div class="actions">
-    <button type="button" class="btn btn-ghost" id="prevBtn3">Previous</button>
-    <button type="button" class="btn btn-primary" id="nextBtn3">Next</button>
-  </div>
-</section>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="prevBtn3">Previous</button>
+          <button type="button" class="btn btn-primary" id="nextBtn3">Next</button>
+        </div>
+      </section>
 
       <!-- Step 4: Parent/Guardian -->
       <section class="section" data-step="4" id="step-4">
@@ -361,158 +368,82 @@ body {
             </div>
           </div>
 
-          <div class="row" style="margin-top:12px;">
+          <div class="row" style="margin-top:10px;">
             <div class="col">
-              <label for="birth_certificate">Birth Certificate (PSA/NSO)</label>
-              <input id="birth_certificate" name="documents[birth_certificate]" type="file" class="form-control" accept=".pdf,.jpg,.png">
+              <label for="birth_cert">Birth Certificate</label>
+              <input id="birth_cert" name="documents[birth_cert]" type="file" class="form-control" accept=".pdf,.jpg,.png">
             </div>
             <div class="col">
-              <label for="id_photo">1x1 or 2x2 ID Photo</label>
-              <input id="id_photo" name="documents[id_photo]" type="file" class="form-control" accept=".jpg,.png">
+              <label for="id_picture">Learner Picture</label>
+              <input id="id_picture" name="documents[id_picture]" type="file" class="form-control" accept=".jpg,.png">
             </div>
           </div>
 
-          <p class="note">Accepted formats: PDF, JPG, PNG. Please bring originals for verification during the first week of classes.</p>
+          <p class="note">* Required files. Maximum size: 5MB each.</p>
         </div>
 
         <div class="actions">
           <button type="button" class="btn btn-ghost" id="prevBtn5">Previous</button>
-          <button type="submit" class="btn btn-primary" id="submitEnroll">Submit Enrollment</button>
+          <button type="submit" class="btn btn-primary">Submit Enrollment</button>
         </div>
       </section>
-
     </form>
   </div>
 </div>
 
 <script>
-  (function() {
-    // helpers
-    const steps = Array.from(document.querySelectorAll('.step'));
-    const sections = Array.from(document.querySelectorAll('.section'));
-    const form = document.getElementById('enrollForm');
+  // Multi-step form logic with validation
+  const sections = document.querySelectorAll('.section');
+  let currentStep = 0;
 
-    function goToStep(n) {
-      // clamp n
-      n = Math.max(1, Math.min(steps.length, n));
-      // activate steps and sections
-      steps.forEach(s => s.classList.toggle('active', parseInt(s.dataset.step) === n));
-      sections.forEach(sec => sec.classList.toggle('active', parseInt(sec.dataset.step) === n));
-      // scroll into view for mobile
-      if (window.innerWidth <= 576) window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function validateSection(stepNumber) {
-      const sec = document.querySelector('.section[data-step="'+stepNumber+'"]');
-      if(!sec) return true;
-      const required = sec.querySelectorAll('input[required], select[required], textarea[required]');
-      for (let el of required) {
-        if (el.type === 'file') continue; // optional file check left to server or final submit
-        if (el.value === null || (typeof el.value === 'string' && el.value.trim() === '')) {
-          el.classList.add('is-invalid'); el.focus();
-          return false;
-        }
-        // specific pattern checks
-        if (el.pattern && el.value) {
-          const re = new RegExp('^' + el.pattern + '$');
-          if (!re.test(el.value)) { el.classList.add('is-invalid'); el.focus(); return false; }
-        }
-        el.classList.remove('is-invalid');
-      }
-      // LRN additional check
-      if (stepNumber === 1) {
-        const lrn = document.getElementById('lrn');
-        if (lrn && lrn.value.replace(/\D/g,'').length !== 12) {
-          lrn.classList.add('is-invalid');
-          document.getElementById('lrnError').style.display = 'block';
-          lrn.focus();
-          return false;
-        } else {
-          if (document.getElementById('lrnError')) document.getElementById('lrnError').style.display = 'none';
-        }
-      }
-      return true;
-    }
-
-    // Next / previous bindings
-    document.getElementById('nextBtn1').addEventListener('click', () => { if (validateSection(1)) goToStep(2); });
-    document.getElementById('nextBtn2').addEventListener('click', () => { if (validateSection(2)) goToStep(3); });
-    document.getElementById('nextBtn3').addEventListener('click', () => { if (validateSection(3)) goToStep(4); });
-    document.getElementById('nextBtn4').addEventListener('click', () => { if (validateSection(4)) goToStep(5); });
-
-    document.getElementById('prevBtn2').addEventListener('click', () => goToStep(1));
-    document.getElementById('prevBtn3').addEventListener('click', () => goToStep(2));
-    document.getElementById('prevBtn4').addEventListener('click', () => goToStep(3));
-    document.getElementById('prevBtn5').addEventListener('click', () => goToStep(4));
-
-    // allow clicking steps (only previous or current)
-    steps.forEach(s => {
-      s.addEventListener('click', () => {
-        const target = parseInt(s.dataset.step);
-        const active = parseInt(document.querySelector('.step.active').dataset.step);
-        if (target <= active) goToStep(target);
-      });
+  const showStep = (step) => {
+    sections.forEach((s, i) => s.classList.toggle('active', i===step));
+    document.querySelectorAll('.progress-steps .step').forEach((s,i)=>{
+      s.classList.toggle('active', i<=step);
     });
+  }
 
-    // LRN input behaviour - digits only and max 12
-    const lrnInput = document.getElementById('lrn');
-    if (lrnInput) {
-      lrnInput.addEventListener('input', function(e) {
-        this.value = this.value.replace(/\D/g,'').slice(0,12);
-        if (this.value.length === 12) { this.classList.remove('is-invalid'); document.getElementById('lrnError').style.display='none'; }
-      });
-    }
-
-    // copy present -> permanent address when checkbox checked
-    const sameCB = document.getElementById('same_as_present');
-    if (sameCB) {
-      sameCB.addEventListener('change', function() {
-        const fields = ['house','street','barangay','city','province','region','zip'];
-        fields.forEach(f => {
-          const present = document.querySelector(`[name="present_${f}"]`);
-          const permanent = document.querySelector(`[name="permanent_${f}"]`);
-          if (present && permanent) {
-            if (sameCB.checked) {
-              permanent.value = present.value;
-              permanent.setAttribute('readonly','true');
-            } else {
-              permanent.removeAttribute('readonly');
-              permanent.value = '';
-            }
-          }
-        });
-      });
-      // keep present -> permanent sync live while checked
-      document.querySelectorAll('[name^="present_"]').forEach(el => {
-        el.addEventListener('input', () => {
-          if (sameCB.checked) {
-            const name = el.getAttribute('name').replace('present_','');
-            const perm = document.querySelector(`[name="permanent_${name}"]`);
-            if (perm) perm.value = el.value;
-          }
-        });
-      });
-    }
-
-    // final submit pre-validation
-    form.addEventListener('submit', function(e) {
-      // validate current visible step
-      const activeStep = parseInt(document.querySelector('.step.active').dataset.step);
-      for (let i=1;i<=activeStep;i++) {
-        if (!validateSection(i)) { e.preventDefault(); return false; }
+  const validateStep = (step) => {
+    const inputs = sections[step].querySelectorAll('input, select, textarea');
+    let valid = true;
+    inputs.forEach(input => {
+      if (input.hasAttribute('required') && !input.value) {
+        valid = false;
+        input.classList.add('is-invalid');
+      } else {
+        input.classList.remove('is-invalid');
       }
-      // all good -> allow normal submit
-      return true;
     });
+    return valid;
+  }
 
-    // initialize to step 1
-    goToStep(1);
-  })();
-</script>
+  const nextBtns = document.querySelectorAll('[id^="nextBtn"]');
+  nextBtns.forEach(btn => btn.addEventListener('click', () => {
+    if (validateStep(currentStep)) {
+      if (currentStep < sections.length - 1) {
+        currentStep++;
+        showStep(currentStep);
+      }
+    } 
+    // else {
+    //   alert("Please fill in all required fields before proceeding.");
+    // }
+  }));
 
-<!-- ✅ Script to copy Current Address → Permanent Address -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+  const prevBtns = document.querySelectorAll('[id^="prevBtn"]');
+  prevBtns.forEach(btn => btn.addEventListener('click', () => {
+    if (currentStep > 0) {
+      currentStep--;
+      showStep(currentStep);
+    }
+  }));
+
+  // Optional: remove invalid highlight on input
+  document.querySelectorAll('input, select, textarea').forEach(input => {
+    input.addEventListener('input', () => input.classList.remove('is-invalid'));
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
     const checkbox = document.getElementById('same_address');
     const currentFields = document.querySelectorAll('[name^="current_"]');
     const permanentFields = document.querySelectorAll('[name^="permanent_"]');
@@ -550,6 +481,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+  // Intercept form submission
+  const enrollForm = document.getElementById('enrollForm');
+  enrollForm.addEventListener('submit', function(e) {
+    // e.preventDefault(); // prevent default form submission
+
+    // Optional: you can do Ajax submit here if needed
+    // For now, just simulate success
+
+    // Show a temporary success message
+    const successDiv = document.createElement('div');
+    successDiv.textContent = "Enrollment submitted successfully!";
+    successDiv.style.position = 'fixed';
+    successDiv.style.top = '20px';
+    successDiv.style.left = '50%';
+    successDiv.style.transform = 'translateX(-50%)';
+    successDiv.style.padding = '16px 24px';
+    successDiv.style.backgroundColor = '#28a745';
+    successDiv.style.color = '#fff';
+    successDiv.style.borderRadius = '8px';
+    successDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
+    successDiv.style.zIndex = '9999';
+    document.body.appendChild(successDiv);
+
+    setTimeout(() => {
+      successDiv.remove();
+      // Redirect to student login page after showing message
+      window.location.href = "{{ route('login.student') }}";
+    }, 2000); // 2 seconds
+  });
 </script>
 
 @endsection

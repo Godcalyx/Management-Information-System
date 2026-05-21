@@ -6,21 +6,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subject extends Model
 {
-    public function professors()
-{
-    // return $this->belongsToMany(Professor::class, 'professor_subject_section')
-    //     ->withPivot('section_id')
-    //     ->withTimestamps();
-}
-// app/Models/Subject.php
+    protected $fillable = [
+        'code',
+        'name',
+        'description',
+        'order',
+        'grade_level',
+        'version',
+        'grade_level_id'
+    ];
 
-public function grades()
-{
-    return $this->hasMany(\App\Models\Grade::class);
-}
+    // Many-to-many relationship to GradeLevel through pivot table
+    public function gradeLevels()
+    {
+        return $this->belongsToMany(
+            GradeLevel::class,       // Related model
+            'grade_level_subject',   // Pivot table
+            'subject_id',            // Foreign key on pivot table for this model
+            'grade_level_id'         // Foreign key on pivot table for related model
+        );
+    }
 
+    // One-to-many relationship with grades
+    public function grades()
+    {
+        return $this->hasMany(\App\Models\Grade::class);
+    }
 
-    protected $fillable = ['name', 'grade_level'];
-
-        
+    // Main grade level (one-to-one / belongsTo)
+    public function gradeLevel()
+    {
+        return $this->belongsTo(GradeLevel::class, 'grade_level_id');
+    }
 }

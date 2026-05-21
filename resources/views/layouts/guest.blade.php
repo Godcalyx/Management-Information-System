@@ -33,7 +33,7 @@
     <nav class="navbar navbar-expand-lg px-4">
         <div class="container-fluid justify-content-between">
 <a class="navbar-brand d-flex align-items-center" href="{{ route('login.student') }}">
-    <img src="{{ asset('images/logo123-removebg-preview.png') }}" alt="CvSU" style="width:54px; border-radius:6px; margin-right:8px;">
+    <img src="{{ asset('images/logo.jpg') }}" alt="CvSU" style="width:54px; border-radius:6px; margin-right:8px;">
     <span>CvSU Portal</span>
 </a>
             {{-- <a class="nav-link" href="{{ route('enroll.form') }}">Not enrolled yet? Enroll now!</a> --}}

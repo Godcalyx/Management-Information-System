@@ -9,16 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 
 class AdminEnrollmentController extends Controller
 {
 
     public function index(Request $request)
 {
-    $query = Enrollment::where('status', 'pending'); // <-- filter only pending
+    $query = Enrollment::with('gradeLevel') // eager load gradeLevel
+        ->where('status', 'pending'); // only pending
 
     if ($request->filled('search')) {
         $search = $request->input('search');
@@ -35,39 +35,19 @@ class AdminEnrollmentController extends Controller
     return view('admin.enrollments.index', compact('enrollments'));
 }
 
+
 public function exportPdf($id)
 {
-    $enrollment = \App\Models\Enrollment::findOrFail($id);
+    $enrollment = Enrollment::with('gradeLevel')->findOrFail($id); // eager load gradeLevel
 
-    // --- Force custom font registration ---
-    $options = new Options();
-    $options->set('defaultFont', 'Aptos');
+    File::ensureDirectoryExists(storage_path('fonts'));
 
-    $dompdf = new Dompdf($options);
-
-    $fontDir = public_path('fonts');
-    $fontMetrics = $dompdf->getFontMetrics();
-
-    // Register Aptos Regular and Bold manually
-    $fontMetrics->registerFont([
-        'family' => 'Aptos',
-        'style' => 'normal',
-        'weight' => 'normal',
-        'file' => $fontDir . '/Aptos.ttf'
-    ]);
-    $fontMetrics->registerFont([
-        'family' => 'Aptos',
-        'style' => 'bold',
-        'weight' => 'bold',
-        'file' => $fontDir . '/Aptos-Bold.ttf'
-    ]);
-
-    // --- Generate PDF from Blade ---
     $pdf = Pdf::loadView('admin.enrollments._modal', compact('enrollment'))
         ->setPaper('a4', 'portrait');
 
     return $pdf->download("Enrollment_{$enrollment->last_name}.pdf");
 }
+
 
 
     public function pending()
@@ -82,7 +62,8 @@ public function exportPdf($id)
 
     // Avoid re-approving
     if ($enrollment->status !== 'pending') {
-        return redirect()->route('admin.enrollments.index')->with('success', 'Enrollment already processed.');
+        return redirect()->route('admin.enrollments.index')
+            ->with('success', 'Enrollment already processed.');
     }
 
     // Check for duplicate email
@@ -100,19 +81,25 @@ public function exportPdf($id)
         'password' => Hash::make($tempPassword),
         'lrn' => $enrollment->lrn ?? Str::random(12),
         'role' => 'student',
+        'grade_level' => $enrollment->grade_level,
     ]);
 
-    // Update enrollment status
+    // ✅ Link the enrollment to the new user and mark as approved
+    $enrollment->user_id = $user->id;
     $enrollment->status = 'approved';
     $enrollment->save();
 
     // Send credentials via email
-    $user->setRelation('enrollment', $enrollment);
-    Mail::to($user->email)->send(new \App\Mail\StudentCredentialsMail($user, $tempPassword));
+    try {
+        Mail::to($user->email)->send(new \App\Mail\StudentCredentialsMail($user, $tempPassword));
+    } catch (\Exception $e) {
+        // You can log or ignore mail failures if needed
+        \Log::error("Mail send failed: " . $e->getMessage());
+    }
 
-    return redirect()->route('admin.enrollments.index')->with('success', 'Enrollment approved and credentials sent.');
+    return redirect()->route('admin.enrollments.index')
+        ->with('success', 'Enrollment approved and credentials sent.');
 }
-
 
     public function reject(Enrollment $enrollment)
     {

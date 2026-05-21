@@ -8,11 +8,8 @@ class Kernel extends HttpKernel
 {
     /**
      * Global HTTP middleware stack.
-     *
-     * These run during every request to your application.
      */
     protected $middleware = [
-        // Laravel default global middleware
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -29,23 +26,21 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
-            // \Illuminate\Session\Middleware\AuthenticateSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SessionTimeout::class,
         ],
 
         'api' => [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 
     /**
      * Route middleware.
-     *
-     * These middleware may be assigned to routes individually.
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -59,21 +54,19 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // 🔐 Spatie role & permission middleware
-        // 'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
-        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
-        'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
-        'force.password.change' => \App\Http\Middleware\ForcePasswordChange::class,
-
 
         // Custom middleware
+        'audit' => \App\Http\Middleware\AuditTrailMiddleware::class,
+        'force.password.change' => \App\Http\Middleware\ForcePasswordChange::class,
+
+        // ✔ Correct role middlewares
+        'admin' => \App\Http\Middleware\EnsureAdmin::class,
         'student' => \App\Http\Middleware\EnsureStudent::class,
         'professor' => \App\Http\Middleware\EnsureProfessor::class,
-        'admin' => \App\Http\Middleware\EnsureAdmin::class,
-        'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-        'student' => \App\Http\Middleware\EnsureUserIsStudent::class,
-        'professor' => \App\Http\Middleware\EnsureUserIsProfessor::class,
+        'super_admin' => \App\Http\Middleware\SuperAdminMiddleware::class,
 
-
+        // Spatie Permission Middleware
+        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
     ];
 }

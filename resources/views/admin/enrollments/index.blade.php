@@ -1,17 +1,19 @@
 @extends('layouts.admin')
 
-@section('content')
-<div class="container mt-5">
+@section('title', 'Enrollment Requests')
 
-    <!-- Header -->
+@section('content')
+<div class="container mt-4">
+
+    {{-- PAGE HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0 fw-bold">Enrollment Requests</h2>
+        <h2 class="fw-bold text-success">Enrollment Requests</h2>
         <a href="{{ route('enrollments.archive') }}" class="btn btn-secondary">
             View Archive →
         </a>
     </div>
 
-    <!-- Success Message -->
+    {{-- Success Message --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
@@ -19,28 +21,21 @@
         </div>
     @endif
 
-    <!-- Search Bar -->
-    <form method="GET" action="{{ route('admin.enrollments.index') }}" class="mb-4">
-        <div class="input-group">
-            <input 
-                type="text" 
-                name="search" 
-                class="form-control" 
-                placeholder="Search by name or LRN..." 
-                value="{{ request('search') }}"
-            >
-            <button class="btn btn-outline-success" type="submit">
-                <i class="bi bi-search me-1"></i> Search
-            </button>
+    {{-- Search Bar --}}
+    <form method="GET" action="{{ route('admin.enrollments.index') }}" class="mb-4 row g-3 align-items-center">
+        <div class="col-md-4">
+            <input type="search" name="search" class="form-control"
+                placeholder="Search by name or LRN..."
+                value="{{ request('search') }}">
         </div>
     </form>
 
-    <!-- Enrollment Table -->
+    {{-- ENROLLMENT TABLE --}}
     @if($enrollments->count())
         <div class="table-responsive shadow-sm rounded-3">
-            <table class="table table-striped align-middle text-center mb-0">
+            <table class="table table-hover align-middle text-center mb-0">
                 <thead class="table-success">
-                    <tr> 
+                    <tr>
                         <th>#</th>
                         <th>Name</th>
                         <th>LRN</th>
@@ -52,9 +47,9 @@
 
                 <tbody>
                     @foreach($enrollments as $enrollment)
-                        <tr>
+                        <tr class="table-row-hover">
                             <td>{{ $loop->iteration }}</td>
-                            <td >{{ $enrollment->first_name }} {{ $enrollment->last_name }}</td>
+                            <td>{{ $enrollment->first_name }} {{ $enrollment->last_name }}</td>
                             <td>{{ $enrollment->lrn }}</td>
                             <td>{{ $enrollment->email }}</td>
                             <td>
@@ -67,8 +62,8 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="d-flex justify-content-center gap-2">
-                                    <!-- View -->
+                                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                    {{-- View --}}
                                     <button class="btn btn-sm btn-info text-white" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#viewModal{{ $enrollment->id }}">
@@ -76,7 +71,7 @@
                                     </button>
 
                                     @if($enrollment->status === 'pending')
-                                        <!-- Approve -->
+                                        {{-- Approve --}}
                                         <form action="{{ route('admin.enrollments.approve', $enrollment->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success">
@@ -84,7 +79,7 @@
                                             </button>
                                         </form>
 
-                                        <!-- Reject -->
+                                        {{-- Reject --}}
                                         <form action="{{ route('admin.enrollments.reject', $enrollment->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-danger">
@@ -103,7 +98,7 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        {{-- Pagination --}}
         <div class="d-flex justify-content-center mt-4">
             {{ $enrollments->withQueryString()->links() }}
         </div>
@@ -113,4 +108,38 @@
         </div>
     @endif
 </div>
+
+{{-- CUSTOM STYLES --}}
+@push('styles')
+<style>
+    .table-row-hover:hover {
+        background-color: #e6f4ea; /* subtle green hover for academic theme */
+        transition: background-color 0.2s ease;
+    }
+    .table-success {
+        background-color: #198754 !important; /* consistent dark green header */
+        color: white;
+    }
+    .table-success th {
+        border-color: #198754;
+    }
+</style>
+@endpush
+
+{{-- SCRIPTS --}}
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Auto-submit search after typing
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let typingTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => searchInput.form.submit(), 400);
+        });
+    }
+});
+</script>
+@endsection
 @endsection

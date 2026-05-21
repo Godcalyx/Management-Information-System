@@ -4,56 +4,105 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ReportCardRequest;
-use App\Models\FormRequest;
+use App\Models\Announcement;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\FormRequestStatusMail;
+use Illuminate\Support\Facades\Auth;
 
 class ReportCardController extends Controller
 {
     public function request(Request $request)
+    {
+        $request->validate([
+            'form_type' => 'required|string',
+        ]);
+
+        ReportCardRequest::create([
+            'user_id' => auth()->id(),
+            'status' => 'pending',
+            'form_type' => $request->form_type,
+        ]);
+
+        return redirect()->back()->with('success', 'Request submitted successfully.');
+    }
+
+   public function index(Request $request)
 {
-    $request->validate([
-        'form_type' => 'required|string', // validate the field
-    ]);
+    $search = $request->search;
 
-    FormRequest::create([
-        'user_id' => auth()->id(),
-        'status' => 'pending',
-        'form_type' => $request->form_type, // ✅ include this
-    ]);
+    $requests = ReportCardRequest::with('user')
+        ->where('status', 'pending')
+        ->when($search, function ($query) use ($search) {
+            // Only apply search if input is not numeric
+            if (!is_numeric($search)) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%");
+                })
+                ->orWhere('form_type', 'LIKE', "%{$search}%");
+            }
+        })
+        ->latest()
+        ->get();
 
-    return redirect()->back()->with('success', 'Request submitted successfully.');
+    $unreadAnnouncementCount = $this->getUnreadAnnouncementCount();
+
+    return view('admin.reportcard.index', compact('requests', 'unreadAnnouncementCount'));
 }
 
-    public function index()
-{
-    // Show only pending requests in main page
-    $requests = ReportCardRequest::where('status', 'pending')->latest()->get();
 
-    return view('admin.reportcard.index', compact('requests'));
-}
 
-public function archive()
-{
-    $approved = ReportCardRequest::where('status', 'approved')->latest()->paginate(10);
-    $rejected = ReportCardRequest::where('status', 'declined')->latest()->paginate(10);
+    public function archive()
+    {
+        $approved = ReportCardRequest::where('status', 'approved')->latest()->paginate(10);
+        $rejected = ReportCardRequest::where('status', 'declined')->latest()->paginate(10);
 
-    return view('admin.reportcard.archive', compact('approved', 'rejected'));
-}
+        $unreadAnnouncementCount = $this->getUnreadAnnouncementCount();
 
-public function approve($id)
-{
-    $request = ReportCardRequest::findOrFail($id);
-    $request->update(['status' => 'approved']);
+        return view('admin.reportcard.archive', compact('approved', 'rejected', 'unreadAnnouncementCount'));
+    }
 
-    return redirect()->route('admin.reportcard.index')->with('success', 'Request approved successfully!');
-}
+    public function approve($id)
+    {
+        $request = ReportCardRequest::findOrFail($id);
+        $request->status = 'approved';
+        $request->save();
 
-public function decline($id)
-{
-    $request = ReportCardRequest::findOrFail($id);
-    $request->update(['status' => 'declined']);
+        Mail::to($request->user->email)->send(new FormRequestStatusMail($request));
 
-    return redirect()->route('admin.reportcard.index')->with('success', 'Request declined successfully!');
-}
+        return redirect()->back()->with('success', 'Request approved and email sent.');
+    }
 
-    
+    public function decline($id)
+    {
+        $request = ReportCardRequest::findOrFail($id);
+        $request->status = 'declined';
+        $request->save();
+
+        Mail::to($request->user->email)->send(new FormRequestStatusMail($request));
+
+        return redirect()->back()->with('success', 'Request declined and email sent.');
+    }
+
+    /**
+     * Get unread announcement count for the authenticated user.
+     */
+    private function getUnreadAnnouncementCount()
+    {
+        $user = Auth::user();
+
+        // Only apply if user has a grade_level (student)
+        if (!$user || !isset($user->grade_level)) {
+            return 0;
+        }
+
+        return Announcement::where(function ($query) use ($user) {
+                $query->whereJsonContains('target_grades', $user->grade_level)
+                      ->orWhereNull('target_grades'); // Null = All
+            })
+            ->whereDoesntHave('users', function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->where('announcement_user.is_read', true);
+            })
+            ->count();
+    }
 }

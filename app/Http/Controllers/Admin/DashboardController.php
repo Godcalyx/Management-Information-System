@@ -19,6 +19,7 @@ class DashboardController extends Controller
 
         $totalStudents = User::where('role', 'student')->count();
         $totalProfessors = User::where('role', 'professor')->count();
+        $announcements = \App\Models\Announcement::latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
             'total',
@@ -27,7 +28,19 @@ class DashboardController extends Controller
             'rejected',
             // 'rejected1',
             'totalStudents',
-            'totalProfessors'
+            'totalProfessors',
+            'announcements'
         ));
     }
+    public function markResolved($gradeId)
+{
+    $grade = \App\Models\Grade::findOrFail($gradeId);
+
+    $grade->status = 'submitted'; // or whatever status you want after resolving
+    $grade->is_notified = true;   // mark as notified
+    $grade->save();
+
+    return redirect()->back()->with('success', 'Grade marked as resolved.');
+}
+
 }

@@ -1,0 +1,18 @@
+# Node modules and PHP vendor folders
+node_modules
+vendor
+
+# Logs and storage
+storage
+logs
+
+# Environment file
+.env
+
+# Git history
+.git
+.gitignore
+
+# IDE files
+*.idea
+*.vscode

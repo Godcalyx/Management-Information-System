@@ -5,8 +5,18 @@
     <div class="col"><input type="text" name="father_middle" class="form-control" placeholder="Middle Name" required></div>
 </div>
 <div class="mb-3">
-    <input type="text" name="father_contact" class="form-control" placeholder="Contact Number">
-</div>
+<input
+    type="text"
+    name="father_contact"
+    class="form-control"
+    placeholder="Contact Number"
+    maxlength="11"
+    inputmode="numeric"
+    pattern="[0-9]{11}"
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
+    required
+>
+
 
 <h6>Mother's Information</h6>
 <div class="row mb-3">
@@ -15,8 +25,18 @@
     <div class="col"><input type="text" name="mother_middle" class="form-control" placeholder="Middle Name" required></div>
 </div>
 <div class="mb-3">
-    <input type="text" name="mother_contact" class="form-control" placeholder="Contact Number">
-</div>
+<input
+    type="text"
+    name="mother_contact"
+    class="form-control"
+    placeholder="Contact Number"
+    maxlength="11"
+    inputmode="numeric"
+    pattern="[0-9]{11}"
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
+    required
+>
+
 
 <h6>Guardian's Information</h6>
 <div class="row mb-3">
@@ -25,5 +45,14 @@
     <div class="col"><input type="text" name="guardian_middle" class="form-control" placeholder="Middle Name" required></div>
 </div>
 <div class="mb-3">
-    <input type="text" name="guardian_contact" class="form-control" placeholder="Contact Number">
-</div>
+<input
+    type="text"
+    name="guardian_contact"
+    class="form-control"
+    placeholder="Contact Number"
+    maxlength="11"
+    inputmode="numeric"
+    pattern="[0-9]{11}"
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
+    required
+>

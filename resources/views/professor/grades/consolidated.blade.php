@@ -10,15 +10,31 @@
         <h2 class="mb-0 fw-bold">Grade Consolidation</h2>
     </div>
 
+     <!-- Legend Indicators (dots) -->
+<div class="mb-4 d-flex align-items-center gap-3">
+    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background: linear-gradient(90deg, #FFD700, #FFC107);" title="98–100 Highest Honors"></span>
+    <small>98–100 Highest Honors</small>
+
+    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:#0d6efd;" title="95–97 High Honors"></span>
+    <small>95–97 High Honors</small>
+
+    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:#198754;" title="90–94 With Honors"></span>
+    <small>90–94 With Honors</small>
+
+    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:#6c757d;" title="Not eligible for honors"></span>
+    <small>Not eligible for honors</small>
+</div>
+
+
     <!-- Filters -->
     <form method="GET" action="{{ route('grades.consolidated') }}" class="row g-3 mb-4">
         <div class="col-md-4">
-            <label for="grade_level" class="form-label">Select Grade Level</label>
-            <select name="grade_level" id="grade_level" class="form-select" onchange="this.form.submit()">
+            <label for="grade_level_id" class="form-label">Select Grade Level</label>
+            <select name="grade_level_id" id="grade_level_id" class="form-select" onchange="this.form.submit()">
                 <option disabled selected>-- Choose Grade Level --</option>
                 @foreach($gradeLevels as $level)
-                    <option value="{{ $level }}" {{ $selectedGrade == $level ? 'selected' : '' }}>
-                        Grade {{ $level }}
+                    <option value="{{ $level->id }}" {{ $selectedGradeId == $level->id ? 'selected' : '' }}>
+                        {{ $level->name }}
                     </option>
                 @endforeach
             </select>
@@ -29,9 +45,7 @@
             <select name="quarter" id="quarter" class="form-select" onchange="this.form.submit()">
                 <option disabled selected>-- Choose Quarter --</option>
                 @foreach(['1' => '1st Quarter', '2' => '2nd Quarter', '3' => '3rd Quarter', '4' => '4th Quarter'] as $key => $label)
-                    <option value="{{ $key }}" {{ $quarter == $key ? 'selected' : '' }}>
-                        {{ $label }}
-                    </option>
+                    <option value="{{ $key }}" {{ $quarter == $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
@@ -40,7 +54,7 @@
     <!-- Search Field -->
     <div class="row mb-3">
         <div class="col-md-6">
-            <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search by LRN or student name...">
+            <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search by LRN or Name">
         </div>
     </div>
 
@@ -52,6 +66,7 @@
             <table id="gradesTable" class="table table-striped align-middle text-center mb-0">
                 <thead class="table-success">
                     <tr>
+                        <th>ID</th>
                         <th>LRN</th>
                         <th class="text-start">Student Name</th>
                         @foreach($subjects as $subject)
@@ -64,50 +79,75 @@
                 <tbody>
                     @foreach($students as $student)
                         <tr>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $student->lrn }}</td>
-                            <td class="text-start">
-                                {{ $student->last_name }}, {{ $student->first_name }}
-                                {{ $student->middle_name ? ' ' . $student->middle_name : '' }}
-                                {{ $student->extension_name ? ' ' . $student->extension_name : '' }}
+                            <td class="text-start" style="white-space: nowrap;">
+                                {{ trim($student->last_name) }}{{ $student->extension_name ? ' ' . trim($student->extension_name) : '' }},
+                                {{ trim($student->first_name) }}{{ $student->middle_name ? ' ' . trim($student->middle_name) : '' }}
                             </td>
 
+                            {{-- Subject Grades --}}
                             @foreach($subjects as $subject)
                                 @php
                                     $grade = $student->grades->firstWhere('subject_id', $subject->id);
+                                    $tooltip = '';
+                                    if ($grade) {
+                                        if ($grade->grade >= 90) $tooltip = 'Excellent';
+                                        elseif ($grade->grade >= 75) $tooltip = 'Satisfactory';
+                                        else $tooltip = 'Needs Improvement';
+                                    }
                                 @endphp
-                                <td @if($grade)
-                                        data-bs-toggle="tooltip" 
-                                        title="@if($grade->grade >= 90) Excellent 
-                                               @elseif($grade->grade >= 75) Satisfactory 
-                                               @else Needs Improvement 
-                                               @endif">
-                                    @endif
-                                >
+                                <td @if($grade) data-bs-toggle="tooltip" title="{{ $tooltip }}" @endif>
                                     {{ $grade ? $grade->grade : '—' }}
                                 </td>
                             @endforeach
 
-                            <td><strong>{{ is_numeric($student->average) ? number_format($student->average, 2) : '—' }}</strong></td>
-
+                            {{-- Average & Honors Badge --}}
                             @php
-                                $remark = $student->remarks;
-                                $badgeClass = match(true) {
-                                    str_contains($remark, 'Highest') => 'bg-warning text-dark',
-                                    str_contains($remark, 'High') => 'bg-primary text-white',
-                                    str_contains($remark, 'With Honors') => 'bg-success text-white',
-                                    str_contains($remark, 'Did Not Meet') => 'bg-danger text-white',
-                                    default => 'bg-secondary',
-                                };
+                                $gradesArray = $student->grades->pluck('grade')->toArray();
+                                $avg = $student->average ?? 0;
+
+                                $minGrade = count($gradesArray) ? min($gradesArray) : 0;
+                                $honorsEligible = $minGrade >= 87 && $avg >= 90;
+
+                                // Average badge
+                                $avgBadgeClass = 'badge ';
+                                $avgBadgeStyle = '';
+
+                                if ($honorsEligible) {
+                                    if ($avg >= 98) {
+                                        $avgBadgeClass .= ''; // style used
+                                        $avgBadgeStyle = 'background: linear-gradient(90deg, #FFD700, #FFC107); color: #1a202c;';
+                                    } elseif ($avg >= 95) {
+                                        $avgBadgeClass .= 'bg-primary text-white';
+                                    } elseif ($avg >= 90) {
+                                        $avgBadgeClass .= 'bg-success text-white';
+                                    }
+                                } else {
+                                    $avgBadgeClass .= 'bg-secondary text-white';
+                                }
+
+                                // Remarks badge text (honors)
+                                if ($honorsEligible) {
+                                    if ($avg >= 98) $remark = '🥇 With Highest Honors';
+                                    elseif ($avg >= 95) $remark = '🥈 With High Honors';
+                                    elseif ($avg >= 90) $remark = '🏅 With Honors';
+                                } else {
+                                    $remark = $student->remarks ?? '';
+                                }
+
+                                $remarkBadgeClass = $avgBadgeClass;
+                                $remarkBadgeStyle = $avgBadgeStyle;
                             @endphp
+
                             <td>
-                                <span class="badge {{ $badgeClass }}" 
-                                      data-bs-toggle="tooltip"
-                                      title="{{ $remark }} means average is {{ 
-                                          str_contains($remark, 'Highest') ? '98+' : 
-                                          (str_contains($remark, 'High') ? '95–97.99' : 
-                                          (str_contains($remark, 'With Honors') ? '90–94.99' : 
-                                          (str_contains($remark, 'Did Not Meet') ? 'below 75' : '75–89.99'))) 
-                                      }}">
+                                <span class="{{ $avgBadgeClass }}" style="{{ $avgBadgeStyle }}">
+                                    {{ is_numeric($avg) ? number_format($avg, 2) : '—' }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="badge {{ $remarkBadgeClass }}" style="{{ $remarkBadgeStyle }}" data-bs-toggle="tooltip" title="{{ $remark }}">
                                     {{ $remark }}
                                 </span>
                             </td>
@@ -130,8 +170,8 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('input', function () {
         const filter = this.value.toLowerCase();
         rows.forEach(row => {
-            const lrn = row.cells[0]?.innerText.toLowerCase() || '';
-            const name = row.cells[1]?.innerText.toLowerCase() || '';
+            const lrn = row.cells[1]?.innerText.toLowerCase() || '';
+            const name = row.cells[2]?.innerText.toLowerCase() || '';
             row.style.display = (lrn.includes(filter) || name.includes(filter)) ? '' : 'none';
         });
     });

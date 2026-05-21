@@ -2,27 +2,35 @@
 
 namespace App\Mail;
 
-use App\Models\FormRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use App\Models\ReportCardRequest;
 
 class FormRequestStatusMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $formRequest;
+    public $request;
 
-    public function __construct(FormRequest $formRequest)
+    /**
+     * Create a new message instance.
+     */
+    public function __construct(ReportCardRequest $request)
     {
-        $this->formRequest = $formRequest;
+        $this->request = $request;
     }
 
+    /**
+     * Build the message.
+     */
     public function build()
     {
-        $status = ucfirst($this->formRequest->status);
+        $subject = "Your Report Card Request Has Been " . ucfirst($this->request->status);
 
-        return $this->subject("Your Form Request has been {$status}")
-                    ->markdown('emails.form_request_status');
+        return $this->subject($subject)
+                    ->view('emails.form-request-status')
+                    ->with(['request' => $this->request]);
+
     }
 }

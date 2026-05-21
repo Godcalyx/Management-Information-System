@@ -47,19 +47,22 @@
                                 </form>
                             </td>
                         </tr>
-                        
                         <tr>
-                            <td>Form 137</td>
-                            <td>Permanent Record</td>
-                            <td>Comprehensive record of a student's academic performance.</td>
+                            <td>COE</td>
+                            <td>Certificate of Enrollment</td>
+                            <td>Official proof of a student's current enrollment for the academic term.</td>
                             <td>
-                                <form action="" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="form_type" value="permanent_record">
-                                    <button type="submit" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Request
-                                    </button>
-                        {{-- Add more rows for other forms later --}}
+                                <form action="{{ route('coe.request') }}" method="POST">
+    @csrf
+    <input type="hidden" name="form_type" value="coe">
+
+    <button type="submit" class="btn btn-sm btn-primary">
+    <i class="bi bi-file-earmark-arrow-up me-1"></i> Request
+    </button>
+</form>
+
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -68,3 +71,4 @@
     </div>
 </div>
 @endsection
+

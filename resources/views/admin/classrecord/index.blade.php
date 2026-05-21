@@ -3,103 +3,72 @@
 @section('title', 'Class Records')
 
 @section('content')
-<div class="container mt-5">
+<div class="container mt-4">
 
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-        <h2 class="fw-bold mb-3 mb-md-0">Class Records</h2>
+    {{-- PAGE HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-success">Class Records</h2>
         <div>
-            <a href="{{ route('excel.exportAll') }}" class="btn btn-success">
-                <i class="bi bi-file-earmark-arrow-down"></i> Export All
-            </a>
+           <a href="{{ route('excel.exportAll') }}" class="btn btn-sm btn-success">
+   Export All
+</a>
+
         </div>
     </div>
 
     {{-- Search & Filter --}}
-    <form method="GET" action="{{ route('classrecord.index') }}" class="row g-2 align-items-center mb-4">
-        <div class="col-md-3">
-            <select name="grade_level" class="form-select" onchange="this.form.submit()">
-                <option value="">All Grade Levels</option>
-                @foreach([7,8,9,10] as $level)
-                    <option value="{{ $level }}" {{ request('grade_level') == $level ? 'selected' : '' }}>
-                        Grade {{ $level }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-6">
-            <input type="search" name="search" class="form-control" placeholder="Search by name or LRN..." value="{{ request('search') }}">
-        </div>
-        <div class="col-md-3 d-grid">
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-search"></i> Search
-            </button>
-        </div>
-    </form>
+    <form method="GET" action="{{ route('classrecord.index') }}" class="mb-3 d-flex gap-2">
+    <select name="grade_level" class="form-select" style="width:auto;">
+        <option value="">-- All Grades --</option>
+        @foreach(App\Models\GradeLevel::all() as $grade)
+            <option value="{{ $grade->id }}" {{ $selectedGrade == $grade->id ? 'selected' : '' }}>
+                {{ $grade->name }}
+            </option>
+        @endforeach
+    </select>
+<button type="submit" class="btn btn-primary">Filter</button>
+    <input type="text" name="search" class="form-control" placeholder="Search by name or LRN" 
+           value="{{ $searchTerm }}">
 
-    {{-- Students Table --}}
-    <div class="card shadow-sm rounded-4">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-secondary text-center">
-                        <tr>
-                            <th>#</th>
-                            <th>LRN</th>
-                            <th>Name</th>
-                            <th>Grade Level</th>
-                            <th>Email</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($students as $student)
-                            <tr class="text-center">
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $student->lrn }}</td>
-                                <td class="text-start">{{ $student->name }}</td>
-                                <td>
-                                    <span class="badge 
-                                        @if($student->grade_level == 7) bg-success
-                                        @elseif($student->grade_level == 8) bg-warning text-dark
-                                        @elseif($student->grade_level == 9) bg-danger
-                                        @elseif($student->grade_level == 10) bg-primary
-                                        @else bg-secondary
-                                        @endif">
-                                        Grade {{ $student->grade_level }}
-                                    </span>
-                                </td>
-                                <td>{{ $student->email }}</td>
-                                <td>
-                                    <button 
-                                        class="btn btn-sm btn-outline-primary" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#exportModal" 
-                                        data-id="{{ $student->id }}" 
-                                        data-name="{{ $student->name }}">
-                                        <i class="bi bi-file-earmark-arrow-down"></i> Export
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    No students found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+    
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>LRN</th>
+            <th>Name</th>
+            <th>Grade Level</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($students as $index => $student)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $student->lrn }}</td>
+                <td>{{ $student->name }}</td>
+                <td>{{ $student->grade_level }}</td>
+                <td>{{ $student->email }}</td>
+                <td>
+                    <a href="{{ route('excel.exportSingle', $student->id) }}" class="btn btn-sm btn-success">
+                        Export
+                    </a>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="6" class="text-center">No students found.</td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
             </div>
         </div>
     </div>
-
-    {{-- Pagination --}}
-    {{-- @if($students->hasPages())
-        <div class="d-flex justify-content-center mt-4">
-            {{ $students->appends(request()->query())->links() }}
-        </div>
-    @endif --}}
 
 </div>
 
@@ -197,5 +166,21 @@
             exportBtn.disabled = false
         })
     })
+    
+document.addEventListener('DOMContentLoaded', () => {
+    // Auto-submit search after typing
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let typingTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => searchInput.form.submit(), 400);
+        });
+    }
+
+});
+
+
+
 </script>
 @endsection

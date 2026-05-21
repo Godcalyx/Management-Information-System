@@ -36,7 +36,7 @@
             <p>Please <strong>log in immediately</strong> and change your password for security.</p>
 
             <div style="text-align: center; margin: 30px 0;">
-                <a href="{{ url('/login.student') }}" style="background-color: #006400; color: #fff; padding: 12px 20px; border-radius: 5px; text-decoration: none;">Go to Login Page</a>
+                <a href="{{ url('/login/student') }}" style="background-color: #006400; color: #fff; padding: 12px 20px; border-radius: 5px; text-decoration: none;">Go to Login Page</a>
             </div>
 
             <p>If you have any questions or did not enroll, please contact the school registrar.</p>

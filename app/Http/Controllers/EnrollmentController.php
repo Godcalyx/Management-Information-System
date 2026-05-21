@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use PDF; // at top
+use App\Models\GradeLevel;
+use Illuminate\Support\Facades\File;
 
 
 class EnrollmentController extends Controller
 {
     public function showForm()
 {
-    return view('enroll');
+     $gradeLevels = GradeLevel::all(); // fetch all grade levels
+
+    return view('enroll', compact('gradeLevels'));
 }
 
 public function submit(Request $request)
@@ -20,7 +24,8 @@ public function submit(Request $request)
         'lrn' => 'nullable|digits:12|unique:enrollments,lrn',
         'email' => 'required|string|max:255',
         'school_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
-        'grade_level' => 'required|string',
+        // 'grade_level' => 'required|string',
+        'grade_level_id' => 'required|exists:grade_levels,id',
         'last_name' => 'required|string|max:255',
         'first_name' => 'required|string|max:255',
         'middle_name' => 'nullable|string|max:255',
@@ -60,17 +65,31 @@ public function submit(Request $request)
         'guardian_middle' => 'nullable|string|max:255',
         'guardian_contact' => 'nullable|string|max:20',
         'modality' => 'nullable|array',
-        'documents' => 'nullable|array',
+        // Remove 'documents' from validation here—handle files separately below
     ]);
 
-    // Set default enrollment status
-    $validatedData['status'] = 'pending';
-
-    // ✅ Assign user_id if a user exists with the given email
-    $user = \App\Models\User::firstWhere('email', $validatedData['email']);
-    if ($user) {
-        $validatedData['user_id'] = $user->id;
+    // Handle file uploads and build the documents array
+    $documents = [];
+    $docFields = ['report_card', 'good_moral', 'birth_cert', 'id_picture'];
+    
+    foreach ($docFields as $field) {
+        if ($request->hasFile("documents.{$field}")) {
+            $file = $request->file("documents.{$field}");
+            // Validate file type and size (additional check beyond form)
+            $request->validate([
+                "documents.{$field}" => 'file|mimes:pdf,jpg,png|max:5120',  // 5MB max, adjust types as needed
+            ]);
+            // Store file in storage/app/public/uploads/ and get the path
+            $path = $file->store('uploads', 'public');
+            $documents[$field] = [$path];  // Store as array for consistency
+        } else {
+            $documents[$field] = [];  // Empty array if no file
+        }
     }
+
+    // Set default enrollment status and add documents
+    $validatedData['status'] = 'pending';
+    $validatedData['documents'] = json_encode($documents);  // Store as JSON string
 
     Enrollment::create($validatedData);
 
@@ -79,9 +98,13 @@ public function submit(Request $request)
 }
 
 
+
 public function export($id)
 {
-    $enrollment = Enrollment::findOrFail($id);
+    $enrollment = Enrollment::with('gradeLevel')->findOrFail($id);
+
+    // DomPDF expects its font cache directory to exist before rendering.
+    File::ensureDirectoryExists(storage_path('fonts'));
 
     // Prepare data for PDF
     $pdf = PDF::loadView('admin.enrollments.export', compact('enrollment'));

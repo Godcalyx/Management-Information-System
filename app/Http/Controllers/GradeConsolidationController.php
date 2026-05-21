@@ -2,109 +2,173 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Subject;
-use App\Models\Grade;
-use App\Models\User;
-use App\Models\GradeLevelProfessor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\Grade;
 use App\Models\Enrollment;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\ProfessorSubject;
+use App\Models\GradeLevel;
+use Illuminate\Support\Facades\DB;
 
 class GradeConsolidationController extends Controller
 {
+    /**
+     * Display students and grades for consolidation
+     */
     public function index(Request $request)
-{
-    $professorId = Auth::id();
+    {
+        $professorId = auth()->id();
 
-    // Get distinct grade levels assigned to this professor
-    $gradeLevels = DB::table('professor_subject_grade_levels')
-        ->where('user_id', $professorId)
-        ->distinct()
-        ->pluck('grade_level');
+        // Get grade levels assigned to this professor
+        $gradeLevels = ProfessorSubject::where('user_id', $professorId)
+            ->join('subjects', 'professor_subjects.subject_id', '=', 'subjects.id')
+            ->join('grade_levels', 'subjects.grade_level_id', '=', 'grade_levels.id')
+            ->pluck('grade_levels.name', 'grade_levels.id')
+            ->unique()
+            ->sort()
+            ->toArray();
 
-    $selectedGrade = $request->input('grade_level');
-    $quarter = $request->input('quarter');
+        $gradeLevelId = $request->input('grade_level', array_key_first($gradeLevels));
 
-    $subjects = collect();
-    $students = collect();
+        if (!$gradeLevelId) {
+            return redirect()->back()->with('error', 'No grade levels assigned.');
+        }
 
-    if ($selectedGrade && $quarter) {
-        // Fetch only assigned subjects for this professor and grade level
-        $subjectIds = DB::table('professor_subject_grade_levels')
-            ->where('user_id', $professorId)
-            ->where('grade_level', $selectedGrade)
-            ->pluck('subject_id');
+        // Subjects handled by professor for this grade level
+        $subjectIds = ProfessorSubject::where('user_id', $professorId)
+            ->join('subjects', 'professor_subjects.subject_id', '=', 'subjects.id')
+            ->where('subjects.grade_level_id', $gradeLevelId)
+            ->pluck('professor_subjects.subject_id');
 
         $subjects = Subject::whereIn('id', $subjectIds)->get();
 
-        $students = Enrollment::where('grade_level', $selectedGrade)
-            ->where('status', 'approved') // ✅ Only approved students
-            ->orderBy('last_name')
+        // Latest approved enrollment per student for this grade level
+        $latestEnrollmentIds = DB::table('enrollments')
+            ->selectRaw('MAX(id) as id')
+            ->where('status', 'approved')
+            ->where('grade_level_id', $gradeLevelId)
+            ->groupBy('user_id')
+            ->pluck('id');
+
+        $students = Enrollment::with('user')
+            ->whereIn('id', $latestEnrollmentIds)
+            ->orderBy('user_id', 'asc')
             ->get();
 
+        // Separate advisory students and others
+        $advisoryStudents = $students->filter(fn($enrollment) => $enrollment->user->adviser_id == $professorId)->values();
+        $otherStudents = $students->whereNotIn('user_id', $advisoryStudents->pluck('user_id'))->values();
+
+        // Existing grades for all students
+        $existingGrades = [];
         foreach ($students as $student) {
-            $grades = Grade::where('user_id', $student->id)
-                ->where('quarter', $quarter)
-                ->where('school_year', now()->year)
-                ->get();
-
-            $total = 0;
-            $count = 0;
-
             foreach ($subjects as $subject) {
-                $grade = $grades->firstWhere('subject_id', $subject->id);
-                if ($grade && $grade->grade !== null) {
-                    $total += $grade->grade;
-                    $count++;
-                }
-            }
+                $grades = Grade::where('user_id', $student->user_id)
+                    ->where('subject_id', $subject->id)
+                    ->pluck('grade', 'quarter')
+                    ->toArray();
 
-            $average = $count > 0 ? round($total / $count, 2) : null;
-            $student->average = $average;
-
-            // Compute remarks
-            if ($average !== null) {
-                if ($average >= 98) {
-                    $student->remarks = '🥇 With Highest Honors';
-                } elseif ($average >= 95) {
-                    $student->remarks = '🥈 With High Honors';
-                } elseif ($average >= 90) {
-                    $student->remarks = '🏅 With Honors';
-                } elseif ($average >= 75) {
-                    $student->remarks = 'PASSED';
-                } else {
-                    $student->remarks = 'FAILED';
-                }
-            } else {
-                $student->remarks = 'No Grades';
+                $existingGrades[$student->user_id][$subject->id] = $grades;
             }
         }
+        $students = $advisoryStudents->merge($otherStudents);
+
+
+        return view('professor.grades.consolidation', compact(
+            'advisoryStudents', 'otherStudents', 'subjects', 'gradeLevelId', 'gradeLevels', 'existingGrades','students'
+        ));
     }
 
-    return view('professor.grades.consolidation', compact('gradeLevels', 'subjects', 'students'));
-}
+    /**
+     * Store submitted grades
+     * Only sets status=submitted if grade is new or changed
+     */
+    public function store(Request $request)
+{
+    $request->validate([
+        'grades.*.*.*' => 'nullable|integer|min:70|max:99',
+        'grade_level_id' => 'required|integer|exists:grade_levels,id'
+    ]);
 
+    $gradesInput = $request->input('grades', []);
+    $gradeLevelId = $request->grade_level_id;
+    
+    foreach ($gradesInput as $studentId => $subjects) {
+        $enrollment = Enrollment::where('user_id', $studentId)
+            ->where('grade_level_id', $gradeLevelId)
+            ->where('status', 'approved')
+            ->latest('id')
+            ->first();
 
+        if (!$enrollment) {
+            continue; // Skip this student if no valid enrollment
+        }
+
+        $currentYear = $enrollment->school_year;
+
+        foreach ($subjects as $subjectId => $quarters) {
+            foreach ($quarters as $quarter => $gradeValue) {
+                if ($gradeValue === null || $gradeValue === '') continue;
+
+                // Check existing grade
+                $existing = Grade::where('user_id', $studentId)
+                    ->where('subject_id', $subjectId)
+                    ->where('quarter', $quarter)
+                    ->where('school_year', $currentYear)
+                    ->first();
+
+                    if (!$existing) {
+                        // Create new
+                        Grade::create([
+                            'user_id'     => $studentId,
+                            'subject_id'  => $subjectId,
+                            'quarter'     => $quarter,
+                            'school_year' => $currentYear,
+                            'grade_level' => $gradeLevelId,
+                            'grade'       => $gradeValue,
+                            'status'      => 'submitted',
+                        ]);
+                        continue;
+                    }
+
+                    // Update only if changed
+                    if ($existing->grade != $gradeValue) {
+                        $existing->update([
+                            'grade'       => $gradeValue,
+                            'grade_level' => $gradeLevelId,
+                            'status'      => 'submitted',
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return back()->with('success', 'Grades submitted successfully!');
+    }
+
+    /**
+     * Assign all subjects of a grade level to a professor
+     */
     public function assignSubjectsToProfessor(Request $request)
     {
-        $professorId = $request->input('user_id');
-        $gradeLevel = $request->input('grade_level');
+        $professorId = $request->user_id;
+        $gradeLevelId = $request->grade_level;
 
-        $subjectIds = Subject::where('grade_level', $gradeLevel)->pluck('id');
+        $subjectIds = Subject::where('grade_level_id', $gradeLevelId)->pluck('id');
 
-        $insertData = $subjectIds->map(function ($subjectId) use ($professorId, $gradeLevel) {
+        $insertData = $subjectIds->map(function ($subjectId) use ($professorId) {
             return [
-                'user_id' => $professorId,
-                'grade_level' => $gradeLevel,
+                'user_id'    => $professorId,
                 'subject_id' => $subjectId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         })->toArray();
 
-        DB::table('grade_level_professor')->insertOrIgnore($insertData);
+        DB::table('professor_subjects')->insertOrIgnore($insertData);
 
-        return back()->with('success', 'All subjects for Grade ' . $gradeLevel . ' assigned to professor.');
+        return back()->with('success', 'All subjects assigned to professor.');
     }
 }

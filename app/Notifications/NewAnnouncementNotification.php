@@ -36,6 +36,6 @@ class NewAnnouncementNotification extends Notification implements ShouldQueue
                  ->action('View Announcement', url('/student/announcements')); // Adjust the URL as needed
         })
         ->line('Thank you for staying informed!')
-        ->salutation('— Laboratory Science High School');
+        ->salutation('— CvSU Naic - Laboratory Science High School');
 }
 }

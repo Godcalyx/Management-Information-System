@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Teacher Login - CvSU Portal</title>
+  <title>Teacher Login - {{ setting('school_name', 'CvSU Portal') }}</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
     /* RESET */
@@ -59,7 +59,7 @@
     }
 
     h2 {
-      color: #00e6b8; /* Bright teal */
+      color: #00e6b8;
       font-size: 22px;
       margin-bottom: 15px;
     }
@@ -142,11 +142,24 @@
 
   <!-- Login Form -->
   <div class="login-container">
-    <img src="{{ asset('images/logo123-removebg-preview.png') }}" alt="CvSU Logo" class="logo">
-    <h2>Welcome to CvSU LSHS Portal</h2>
+    @if(setting('school_logo'))
+    <img src="{{ Storage::url(setting('school_logo')) }}"
+         alt="School Logo"
+         class="logo">
+@else
+    <img src="{{ asset('images/default-logo.png') }}"
+         alt="Default Logo"
+         class="logo">
+@endif
+
+
+    <h2>Welcome to {{ setting('school_name', 'CvSU Laboratory Science High School') }} Portal</h2>
+
     <p class="note-text">(Please login to access your teacher dashboard)</p>
     <hr class="my-4">
+
     <h2>Teacher Login</h2>
+
     <form method="POST" action="{{ route('login.professor') }}">
       @csrf
       <input type="email" name="email" placeholder="Teacher Email" required>

@@ -3,20 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Login - CvSU Portal</title>
+  <title>Admin Login - {{ setting('school_name', 'CvSU Portal') }}</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
     /* RESET */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     /* BODY */
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #001a1a, #002b2b);
+      background: linear-gradient(135deg, #1a0003ff, #a82222ff);
       color: #f5f5f5;
       min-height: 100vh;
       display: flex;
@@ -26,7 +22,6 @@
       position: relative;
     }
 
-    /* BACKGROUND GLOW */
     .glow-behind {
       position: absolute;
       top: 50%;
@@ -40,11 +35,10 @@
       pointer-events: none;
     }
 
-    /* LOGIN CONTAINER */
     .login-container {
       position: relative;
       z-index: 1;
-      background: rgba(0, 25, 25, 0.95);
+      background: rgba(57, 2, 2, 0.95);
       border-radius: 12px;
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
       width: 100%;
@@ -78,7 +72,6 @@
       margin: 20px 0;
     }
 
-    /* FORM */
     form input {
       width: 100%;
       padding: 12px;
@@ -137,23 +130,64 @@
 </head>
 <body>
 
-  <!-- Subtle Glow Behind -->
   <div class="glow-behind"></div>
 
-  <!-- Login Container -->
+  {{-- @if($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif --}}
+
+
   <div class="login-container">
-    <img src="{{ asset('images/logo123-removebg-preview.png') }}" alt="CvSU Logo" class="logo">
-    <h2>Welcome to CvSU LSHS Portal</h2>
+    @if(setting('school_logo'))
+    <img src="{{ Storage::url(setting('school_logo')) }}"
+         alt="School Logo"
+         class="logo">
+@else
+    <img src="{{ asset('images/default-logo.png') }}"
+         alt="Default Logo"
+         class="logo">
+@endif
+
+    <h2>
+      Welcome to {{ setting('school_name', 'CvSU Laboratory Science High School') }} Portal
+    </h2>
+
     <p class="note-text">(Please login to access your admin dashboard)</p>
     <hr>
+
     <h2>Admin Login</h2>
 
     <form method="POST" action="{{ route('login.admin') }}">
-      @csrf
-      <input type="email" name="email" placeholder="Admin Email" required>
+  @csrf
+
+  <div style="margin-bottom: 10px;">
+      <input type="email" name="email" placeholder="Admin Email" required
+             value="{{ old('email') }}">
+      @error('email')
+          <div style="color: #FF6B6B; font-size: 13px; margin-top: 3px;">
+              {{ $message }}
+          </div>
+      @enderror
+  </div>
+
+  <div style="margin-bottom: 10px;">
       <input type="password" name="password" placeholder="Password" required>
-      <button type="submit">Login</button>
-    </form>
+      @error('password')
+          <div style="color: #FF6B6B; font-size: 13px; margin-top: 3px;">
+              {{ $message }}
+          </div>
+      @enderror
+  </div>
+
+  <button type="submit">Login</button>
+</form>
+
 
     <div class="back-link">
       Don’t have an account? <a href="{{ route('register.admin') }}">Register here</a>

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Support\Facades\Route;
 
 class Authenticate extends Middleware
 {
@@ -14,16 +15,25 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
-        if (! $request->expectsJson()) {
-
-            if ($request->is('admin/*') || $request->is('login/admin')) {
-                return route('login.admin');
-            } elseif ($request->is('professor/*') || $request->is('login/professor')) {
-                return route('login.professor');
-            } else {
-                // Default to student login
-                return route('login.student');
-            }
+        if ($request->expectsJson()) {
+            return null;
         }
+
+        // Determine intended login route based on URL
+        $loginRoute = null;
+        if ($request->is('admin/*') || $request->is('login/admin')) {
+            $loginRoute = 'login.admin';
+        } elseif ($request->is('professor/*') || $request->is('login/professor')) {
+            $loginRoute = 'login.professor';
+        } elseif ($request->is('student/*') || $request->is('login/student')) {
+            $loginRoute = 'login.student';
+        }
+
+        // If route exists, use it; otherwise, fallback to homepage
+        if ($loginRoute && Route::has($loginRoute)) {
+            return route($loginRoute);
+        }
+
+        return url('/welcome');
     }
 }

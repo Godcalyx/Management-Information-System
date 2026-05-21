@@ -23,52 +23,62 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+{
+    $request->authenticate();
+    $request->session()->regenerate();
 
-        $request->session()->regenerate();
+    dd(auth()->user()->id, auth()->user()->role, auth()->check());
+}
 
-        return redirect()->intended(route('dashboard', absolute: false));
-    }
 
     /**
      * Destroy an authenticated session.
      */
     public function destroy(Request $request)
-{
-    $user = Auth::user(); // Capture user before logout
-    $role = $user?->getRoleNames()->first(); // Spatie method
+    {
+        $user = Auth::user(); // Capture user before logout
+        $role = $user?->role; // Use role column directly
 
-    Auth::guard('web')->logout();
+        Auth::guard('web')->logout();
 
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    // Redirect based on role
-    switch ($role) {
-        case 'admin':
-            return redirect('/login/admin');
-        case 'professor':
-            return redirect('/login/professor');
-        case 'student':
-            return redirect('/login/student');
-        default:
-            return redirect('/'); // Fallback
-    }
+        // Redirect based on role after logout
+        switch ($role) {
+    case 'super_admin':
+    case 'admin':
+        return redirect('/login/admin'); 
+    case 'professor':
+        return redirect('/login/professor');
+    case 'student':
+        return redirect('/login/student');
+    default:
+        return redirect('/');
 }
 
+
+    }
+
+    /**
+     * Determine where to redirect users after login.
+     */
     protected function redirectTo()
 {
     switch (auth()->user()->role) {
+        case 'superadmin':
+            return route('super_admin.dashboard'); // ✅ FIXED
         case 'admin':
-            return '/admin/dashboard';
+            return route('admin.dashboard');
         case 'professor':
-            return '/professor/dashboard';
+            return route('professor.dashboard');
         case 'student':
-            return '/student/dashboard';
+            return route('student.dashboard');
         default:
             return '/';
     }
 }
+
+
 
 }

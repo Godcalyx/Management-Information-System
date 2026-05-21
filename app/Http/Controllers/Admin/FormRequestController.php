@@ -5,15 +5,30 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FormRequest;
+use App\Models\Announcement;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\FormRequestStatusMail;
+use Illuminate\Support\Facades\Auth;
 
 class FormRequestController extends Controller
 {
     public function index()
     {
         $requests = FormRequest::with('user')->latest()->get();
-        return view('admin.form_requests', compact('requests'));
+
+        // Count unread announcements for admin (if applicable)
+        $user = Auth::user();
+        $unreadAnnouncementCount = Announcement::where(function($query) use ($user) {
+                $query->whereJsonContains('target_grades', $user->grade_level ?? null)
+                      ->orWhereNull('target_grades');
+            })
+            ->whereDoesntHave('users', function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->where('announcement_user.is_read', true);
+            })
+            ->count();
+
+        return view('admin.form_requests', compact('requests', 'unreadAnnouncementCount'));
     }
 
     public function update(Request $request, $id)

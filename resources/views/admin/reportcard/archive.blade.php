@@ -18,9 +18,9 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">Approved</button>
         </li>
-        <li class="nav-item" role="presentation">
+        {{-- <li class="nav-item" role="presentation">
             <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">Rejected</button>
-        </li>
+        </li> --}}
     </ul>
 
     <div class="tab-content mt-3" id="archiveTabsContent">
@@ -60,7 +60,7 @@
             @endif
         </div>
 
-        <!-- Rejected Requests -->
+        {{-- <!-- Rejected Requests -->
         <div class="tab-pane fade" id="rejected" role="tabpanel">
             @if($rejected->count())
                 <div class="table-responsive shadow-sm rounded-3">
@@ -93,7 +93,7 @@
                     No rejected requests found.
                 </div>
             @endif
-        </div>
+        </div> --}}
     </div>
 </div>
 @endsection

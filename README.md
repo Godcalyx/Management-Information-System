@@ -1,57 +1,88 @@
-# 🏫 LSHS: Online Management Information System
+# LSHS: Online Management Information System
 
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active-success)](https://github.com/Godcalyx/Management-Information-System)
 
-A comprehensive **school management platform** designed for **Laguna Senior High School (LSHS)** to simplify and automate academic and administrative workflows.  
-It enables administrators, teachers, and students to manage school operations efficiently within a centralized online system.
+A web-based information system for Laboratory Science High School (LSHS) focused on enrollment, grading, attendance, and academic records management.
 
----
+## About
 
-## ✨ Features
+The LSHS Online Management Information System (OMIS) is a capstone project built to reduce manual record handling and improve access to school data for administrators, professors, students, and superadmins.
 
-- 👩‍🏫 **Admin Dashboard** – Real-time school data overview  
-- 🎓 **Student Management** – Add, edit, or delete student records  
-- 🧾 **Report Card Generation** – Automatically generate printable student cards  
-- 🕒 **Attendance Tracking** – Monitor daily attendance  
-- 📨 **Announcements** – Post and manage updates for users  
-- 🔐 **Secure Login System** – Role-based access for Admin, Teacher, and Student  
+## Features
 
----
+- Role-based access for admin, professor, student, and superadmin users
+- Student enrollment and approval workflow
+- Grade encoding, approval, and report generation
+- Attendance and announcement management
+- Form and report-card request handling
+- PDF and Excel exports for academic records
 
-## 🖼️ Screenshots
+## Tech Stack
 
-### 🔐 Admin Login
-![Admin Login](screenshots/Admin_Login.png)
+| Category | Technology |
+| --- | --- |
+| Frontend | HTML, CSS, JavaScript, Bootstrap |
+| Backend | PHP, Laravel |
+| Database | MySQL |
+| Local Server | XAMPP / Apache |
+| Version Control | Git, GitHub |
 
-### 🏠 Admin Dashboard
-![Admin Dashboard](screenshots/Admin_Dashboard.png)
+## Installation
 
-### 👩‍🎓 Student Management
-![Student List](screenshots/Student_List.png)
+### Prerequisites
 
-### 🧾 Report Card
-![Report Card](screenshots/Report_Card.png)
+- [XAMPP](https://www.apachefriends.org/download.html)
+- [Composer](https://getcomposer.org/)
+- [Git](https://git-scm.com/downloads)
+- A modern web browser
 
----
+### Setup
 
-## 🧰 Tech Stack
+1. Clone the repository:
 
-| Layer | Technology Used |
-|-------|------------------|
-| **Frontend** | HTML, CSS, JavaScript, Bootstrap |
-| **Backend** | PHP (Laravel Framework) |
-| **Database** | MySQL |
-| **Server** | XAMPP / Apache |
-| **Version Control** | Git & GitHub |
-
----
-
-## ⚙️ Installation Guide
-
-### 1. Clone the repository
 ```bash
 git clone https://github.com/Godcalyx/Management-Information-System.git
+cd LSHS-OMIS
+```
+
+2. Install dependencies:
+
+```bash
+composer install
+```
+
+3. Create and configure the environment file:
+
+```bash
+copy .env.example .env
+php artisan key:generate
+```
+
+4. Update `.env` with your database credentials, then run:
+
+```bash
+php artisan migrate
+```
+
+5. Start the local server:
+
+```bash
+php artisan serve
+```
+
+## Screenshots
+
+### Login Page
+![Login Page](screenshots/Admin_Login.png)
+
+### Admin Dashboard
+![Admin Dashboard](screenshots/Admin_Dashboard.png)
+
+### Student Management
+![Student List](screenshots/Student_List.png)
+
+### Report Card
+![Grades Report](screenshots/Report_Card.png)
